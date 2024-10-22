@@ -22,7 +22,7 @@ import sauces from '../mocks/sauces.json'
 
       <div class="sheet__content dough">
         <label  v-for="item in dough" :key="item.id" :class="item.name == 'Тонкое' ? 'dough__input dough__input--light' : 'dough__input dough__input--large'">
-          <input type="radio" name="dought" :value="item.name == 'Тонкое' ? 'light' : 'large'" class="visually-hidden" checked>
+          <input type="radio" name="dought" :value="item.name == 'Тонкое' ? 'light' : 'large'" class="visually-hidden" :checked="item.name == 'Тонкое'">
           <b>{{ item.name }}</b>
           <span>{{ item.description }}</span>
         </label>
@@ -39,7 +39,7 @@ import sauces from '../mocks/sauces.json'
       <div class="sheet__content diameter">
 
         <label v-for="size in sizes" :key="size.id" :class="size.multiplier === 1 ? 'diameter__input diameter__input--small' : size.multiplier === 2 ? 'diameter__input diameter__input--normal' : 'diameter__input diameter__input--big'">
-          <input type="radio" name="diameter" :value="size.multiplier === 1 ? 'small' : size.multiplier === 2 ? 'normal' : 'big'" class="visually-hidden">
+          <input type="radio" name="diameter" :value="size.multiplier === 1 ? 'small' : size.multiplier === 2 ? 'normal' : 'big'" class="visually-hidden" :checked="size.multiplier === 1">
           <span>{{ size.name }}</span>
         </label>
 
@@ -54,16 +54,16 @@ import sauces from '../mocks/sauces.json'
       <div class="sheet__content ingredients">
 
         <div class="ingredients__sauce">
-          <p>Основной соус:</p>
+          <p style="padding: 0;">Основной соус:</p>
 
           <label v-for="sauce in sauces" class="radio ingredients__input">
-            <input type="radio" name="sauce" :value="sauce.name === 'Томатный' ? 'tomato' : 'creamy'" checked>
+            <input type="radio" name="sauce" :checked='sauce.name === "Томатный"' :value="sauce.name === 'Томатный' ? 'tomato' : 'creamy'">
             <span>{{ sauce.name }}</span>
           </label>
         </div>
 
         <div class="ingredients__filling">
-          <p>Начинка:</p>
+          <p style="text-align: unset; padding: 0;">Начинка:</p>
 
           <ul class="ingredients__list">
             <li v-for="ingredient in ingredients" class="ingredients__item">
@@ -89,6 +89,7 @@ import sauces from '../mocks/sauces.json'
   </div>
 
   <div class="content__pizza">
+
     <label class="input">
       <span class="visually-hidden">Название пиццы</span>
       <input type="text" name="pizza_name" placeholder="Введите название пиццы">
@@ -105,9 +106,10 @@ import sauces from '../mocks/sauces.json'
     </div>
 
     <div class="content__result">
-      <p>Итого: 0 ₽</p>
+      <p style="padding: 0;">Итого: 0 ₽</p>
       <button type="button" class="button" disabled>Готовьте!</button>
     </div>
+
   </div>
 
 </div>
@@ -117,6 +119,6 @@ import sauces from '../mocks/sauces.json'
 </main>
 </template>
 
-<style>
+<style lang="scss">
 
 </style>
