@@ -1,3 +1,13 @@
+<template>
+  <div class="popup">
+    <slot />
+  </div>
+</template>
+
+<style lang="scss" scoped>
+@import "@/assets/scss/ds-system/ds.scss";
+@import "@/assets/scss/mixins/mixins.scss";
+
 .popup {
   @include pf_center-all;
 
@@ -47,15 +57,4 @@
     text-align: center;
   }
 }
-
-.popup__title {
-  text-align: center;
-
-  font-size: 1.3em;
-}
-
-.popup__button {
-  a {
-    padding: 16px 32px;
-  }
-}
+</style>

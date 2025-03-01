@@ -1,3 +1,27 @@
+<template>
+  <main class="layout">
+    <div class="layout__sidebar sidebar">
+      <router-link :to="{ name: 'home' }" class="logo layout__logo">
+        <img
+          src="@/assets/img/logo.svg"
+          alt="V!U!E! Pizza logo"
+          width="90"
+          height="40"
+        />
+      </router-link>
+
+      <slot name="sidebar" />
+    </div>
+
+    <div class="layout__content">
+      <slot />
+    </div>
+  </main>
+</template>
+
+<style lang="scss">
+@import "@/assets/scss/ds-system/ds.scss";
+
 .layout__sidebar {
   position: fixed;
   z-index: 2;
@@ -61,13 +85,11 @@
 }
 
 .layout__button {
+  $self: &;
   margin-top: 40px;
 
-  button {
+  button[type="button"] {
     padding: 12px 23px;
   }
 }
-
-.layout__address {
-  margin-top: 16px;
-}
+</style>

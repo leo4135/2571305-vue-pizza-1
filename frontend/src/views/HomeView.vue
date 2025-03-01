@@ -1,124 +1,175 @@
-<script setup>
-import dough from '../mocks/dough.json';
-import sizes from '../mocks/sizes.json';
-import ingredients from '../mocks/ingredients.json';
-import sauces from '../mocks/sauces.json'
-
-
-</script>
-
 <template>
+  <main class="content">
+    <form action="#" method="post">
+      <div class="content__wrapper">
+        <h1 class="title title--big">Конструктор пиццы</h1>
 
-<main class="content">
-<form action="#" method="post">
+        <DoughChooser v-model="doughId" :items="dataStore.doughs" />
 
-<div class="content__wrapper">
-  <h1 class="title title--big">Конструктор пиццы</h1>
+        <DiameterChooser v-model="sizeId" :items="dataStore.sizes" />
 
-  <div class="content__dough">
+        <div class="content__ingredients">
+          <div class="sheet">
+            <h2 class="title title--small sheet__title">
+              Выберите ингредиенты
+            </h2>
 
-    <div class="sheet">
-      <h2 class="title title--small sheet__title">Выберите тесто</h2>
+            <div class="sheet__content ingredients">
+              <SauceChooser v-model="sauceId" :items="dataStore.sauces" />
 
-      <div class="sheet__content dough">
-        <label  v-for="item in dough" :key="item.id" :class="item.name == 'Тонкое' ? 'dough__input dough__input--light' : 'dough__input dough__input--large'">
-          <input type="radio" name="dought" :value="item.name == 'Тонкое' ? 'light' : 'large'" class="visually-hidden" :checked="item.name == 'Тонкое'">
-          <b>{{ item.name }}</b>
-          <span>{{ item.description }}</span>
-        </label>
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="content__diameter">
-    <div class="sheet">
-      <h2 class="title title--small sheet__title">Выберите размер</h2>
-
-      <div class="sheet__content diameter">
-
-        <label v-for="size in sizes" :key="size.id" :class="size.multiplier === 1 ? 'diameter__input diameter__input--small' : size.multiplier === 2 ? 'diameter__input diameter__input--normal' : 'diameter__input diameter__input--big'">
-          <input type="radio" name="diameter" :value="size.multiplier === 1 ? 'small' : size.multiplier === 2 ? 'normal' : 'big'" class="visually-hidden" :checked="size.multiplier === 1">
-          <span>{{ size.name }}</span>
-        </label>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="content__ingredients">
-    <div class="sheet">
-      <h2 class="title title--small sheet__title">Выберите ингредиенты</h2>
-
-      <div class="sheet__content ingredients">
-
-        <div class="ingredients__sauce">
-          <p style="padding: 0;">Основной соус:</p>
-
-          <label v-for="sauce in sauces" class="radio ingredients__input">
-            <input type="radio" name="sauce" :checked='sauce.name === "Томатный"' :value="sauce.name === 'Томатный' ? 'tomato' : 'creamy'">
-            <span>{{ sauce.name }}</span>
-          </label>
+              <IngredientsChooser
+                :values="pizzaStore.ingredientQuantities"
+                :ingredients="dataStore.ingredients"
+                @update="pizzaStore.setIngredientQuantity"
+              />
+            </div>
+          </div>
         </div>
 
-        <div class="ingredients__filling">
-          <p style="text-align: unset; padding: 0;">Начинка:</p>
+        <div class="content__pizza">
+          <PizzaNameInput v-model="name" />
 
-          <ul class="ingredients__list">
-            <li v-for="ingredient in ingredients" class="ingredients__item">
-              <span :class="'filling filling--' + ingredient.image.split('/')[1].split('.')[0]">{{ ingredient.name }}</span>
+          <PizzaObject
+            :dough="pizzaStore.dough.value"
+            :sauce="pizzaStore.sauce.value"
+            :ingredients="pizzaStore.ingredientsExtended"
+            @drop="pizzaStore.incrementIngredientQuantity"
+          />
 
-              <div class="counter counter--orange ingredients__counter">
-                <button type="button" class="counter__button counter__button--minus" disabled>
-                  <span class="visually-hidden">Меньше</span>
-                </button>
-                <input type="text" name="counter" class="counter__input" value="0">
-                <button type="button" class="counter__button counter__button--plus">
-                  <span class="visually-hidden">Больше</span>
-                </button>
-              </div>
-            </li>
-          
-          </ul>
-
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="content__pizza">
-
-    <label class="input">
-      <span class="visually-hidden">Название пиццы</span>
-      <input type="text" name="pizza_name" placeholder="Введите название пиццы">
-    </label>
-
-    <div class="content__constructor">
-      <div class="pizza pizza--foundation--big-tomato">
-        <div class="pizza__wrapper">
-          <div class="pizza__filling pizza__filling--ananas"></div>
-          <div class="pizza__filling pizza__filling--bacon"></div>
-          <div class="pizza__filling pizza__filling--cheddar"></div>
+          <div class="content__result">
+            <p>Итого: {{ pizzaStore.price }} ₽</p>
+            <button
+              type="button"
+              class="button"
+              :disabled="disableSubmit"
+              @click="addToCart"
+            >
+              Готовьте!
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="content__result">
-      <p style="padding: 0;">Итого: 0 ₽</p>
-      <button type="button" class="button" disabled>Готовьте!</button>
-    </div>
-
-  </div>
-
-</div>
-
-</form>
-
-</main>
+    </form>
+  </main>
 </template>
 
-<style lang="scss">
+<script setup>
+import { computed, onMounted } from "vue";
+import DoughChooser from "../modules/constructor/DoughChooser.vue";
+import DiameterChooser from "../modules/constructor/DiameterChooser.vue";
+import SauceChooser from "../modules/constructor/SauceChooser.vue";
+import IngredientsChooser from "../modules/constructor/IngredientsChooser.vue";
+import PizzaObject from "../modules/constructor/PizzaObject.vue";
+import PizzaNameInput from "../modules/constructor/PizzaNameInput.vue";
 
+import { usePizzaStore } from "@/stores/pizzaStore";
+import { useDataStore } from "@/stores/dataStore";
+import { useCartStore } from "@/stores/cartStore";
+import { useRouter } from "vue-router";
+
+const dataStore = useDataStore();
+const pizzaStore = usePizzaStore();
+const cartStore = useCartStore();
+
+const router = useRouter();
+
+const name = computed({
+  get() {
+    return pizzaStore.name;
+  },
+  set(value) {
+    pizzaStore.setName(value);
+  },
+});
+
+const doughId = computed({
+  get() {
+    return pizzaStore.doughId;
+  },
+  set(value) {
+    pizzaStore.setDough(value);
+  },
+});
+
+const sizeId = computed({
+  get() {
+    return pizzaStore.sizeId;
+  },
+  set(value) {
+    pizzaStore.setSize(value);
+  },
+});
+
+const sauceId = computed({
+  get() {
+    return pizzaStore.sauceId;
+  },
+  set(value) {
+    pizzaStore.setSauce(value);
+  },
+});
+
+const disableSubmit = computed(() => {
+  return name.value.length === 0 || pizzaStore.price === 0;
+});
+
+const addToCart = async () => {
+  cartStore.savePizza(pizzaStore.$state);
+  await router.push({ name: "cart" });
+  resetPizza();
+};
+
+const resetPizza = () => {
+  pizzaStore.setName("");
+  if (dataStore.isDataLoaded) {
+    pizzaStore.setDough(dataStore.doughs[0].id);
+    pizzaStore.setSize(dataStore.sizes[0].id);
+    pizzaStore.setSauce(dataStore.sauces[0].id);
+  }
+  pizzaStore.setIngredients([]);
+  pizzaStore.setIndex(null);
+};
+
+onMounted(() => {
+  if (pizzaStore.index === null) {
+    resetPizza();
+  }
+});
+</script>
+
+<style lang="scss">
+@import "@/assets/scss/ds-system/ds.scss";
+@import "@/assets/scss/mixins/mixins.scss";
+
+.content__ingredients {
+  width: 527px;
+  margin-top: 15px;
+  margin-right: auto;
+  margin-bottom: 15px;
+}
+
+.content__pizza {
+  width: 373px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.content__result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 25px;
+
+  p {
+    @include b-s24-h28;
+
+    margin: 0;
+  }
+
+  button {
+    margin-left: 12px;
+    padding: 16px 45px;
+  }
+}
 </style>
